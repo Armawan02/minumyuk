@@ -31,29 +31,51 @@ class _MinumYukAppState extends State<MinumYukApp> {
   }
 
   // Cek apakah ada user_id yang tersimpan di memori HP
+  // Lokasi: _MinumYukAppState di main.dart
   Future<void> _checkSession() async {
+    print('DEBUG AMBIL: Memulai pengecekan sesi...');
     final prefs = await SharedPreferences.getInstance();
-    final storedId = prefs.getInt('user_id');
+    final storedId = prefs.getInt('current_user_id');
+
+    print(
+      'DEBUG AMBIL: ID yang diambil dari memori HP: $storedId',
+    ); // <-- TAMBAH INI
 
     if (storedId != null) {
       setState(() {
         _currentUserId = storedId;
         _isLoading = false;
       });
+      print('DEBUG AMBIL: Sesi Ditemukan. Langsung ke WaterTrackerScreen.');
     } else {
       setState(() {
         _isLoading = false;
       });
+      print('DEBUG AMBIL: Sesi TIDAK Ditemukan. Menampilkan AuthScreen.');
     }
   }
 
   // Fungsi untuk update state setelah login/logout
+  // Lokasi: _MinumYukAppState di main.dart
+  // Lokasi: _MinumYukAppState di lib/main.dart
+
   void _updateUserSession(int? userId) async {
     final prefs = await SharedPreferences.getInstance();
+
     if (userId != null) {
-      prefs.setInt('user_id', userId);
+      // 1. Tulis ID dan JANGAN LUPA AWAIT!
+      await prefs.setInt('user_id', userId);
+
+      // 2. DEBUG KRUSIAL: Baca kembali ID segera setelah disimpan
+      final checkBack = prefs.getInt('user_id');
+
+      print('DEBUG SIMPAN: ID PENGGUNA BARU berhasil disimpan: $userId');
+      print(
+        'DEBUG SIMPAN: CHECK BALIK: Apakah ID baru terbaca? $checkBack',
+      ); // <-- LIHAT OUTPUT INI
     } else {
-      prefs.remove('user_id'); // Logout
+      prefs.remove('user_id');
+      print('DEBUG SIMPAN: Sesi dihapus (Logout).');
     }
     setState(() {
       _currentUserId = userId;
